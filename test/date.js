@@ -1,19 +1,18 @@
 /**************************************************
-  Node
+  Node ... uncomment this out for node.js
  *************************************************/
 
-var _date, _;
-if (typeof window === 'undefined') {
-    _date = require('underscore.date');
-    module = QUnit.module;
-    _ = { date : _date };
-}
+//var _date, _;
+//if (typeof window === 'undefined') {
+//    _date = require('underscore.date');
+//    module = QUnit.module;
+//    _ = { date : _date };
+//}
 
 
 /**************************************************
   Tests
  *************************************************/
- 
 
 module("create");
 
@@ -50,6 +49,14 @@ test("string without format", 2, function() {
     ok(_date("Mon, 25 Dec 1995 13:30:00 GMT").date instanceof Date, "Mon, 25 Dec 1995 13:30:00 GMT");
 });
 
+test("isostring without format", 4, function() {
+    equal(_date("2012-04-10T14:45:00+00:00").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 07:45:00 PDT" , "2012-04-10T15:15:00+00:00");
+    equal(_date("2012-04-10T14:45:00-07:00").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 14:45:00 PDT" , "2012-04-10T15:15:00-07:00");
+
+    _dt = _date("2012-04-10T14:45:00+00:00");
+    equal(_dt.gmt().format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 14:45:00 PDT" , "2012-04-10T15:15:00+00:00");
+    equal(_dt.format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 07:45:00 PDT" , "2012-04-10T15:15:00+00:00");
+});
 
 test("string with format", 11, function() {
     var a = [
@@ -95,7 +102,7 @@ test("format", 15, function() {
             ['m mm',                               '25 25'],
             ['s ss',                               '50 50'],
             ['a A',                                'pm PM'],
-            ['z zz',                               'PST Pacific Standard Time'],
+            ['z zz',                               'PST Pacific Standard Time', 'PST PST'],
             ['t\\he DDDo \\d\\ay of t\\he ye\\ar', 'the 45th day of the year']
         ],
         b = _date(new Date(2010, 1, 14, 15, 25, 50, 125)),
@@ -111,18 +118,18 @@ module("add and subtract");
 
 test("add and subtract", 3, function() {
     equal(
-        _date([2010, 1, 14, 15, 25, 50, 125]).add({ms:200,s:10,m:10,h:2,d:3,M:2,y:3}).format("MMMM Do YYYY, h:mm:ss a"), 
-        "April 17th 2013, 5:36:00 pm", 
+        _date([2010, 1, 14, 15, 25, 50, 125]).add({ms:200,s:10,m:10,h:2,d:3,M:2,y:3}).format("MMMM Do YYYY, h:mm:ss a"),
+        "April 17th 2013, 5:36:00 pm",
         "[2010, 1, 14, 15, 25, 50, 125] + {ms:200,s:10,m:10,h:2,d:3,M:2,y:3} = April 17th 2013, 5:36:00 pm"
     );
     equal(
-        _date([2010, 0, 31]).add({M:1}).format("MMMM Do YYYY"), 
-        "February 28th 2010", 
+        _date([2010, 0, 31]).add({M:1}).format("MMMM Do YYYY"),
+        "February 28th 2010",
         "[2010, 0, 31] + {M:1} = February 28th 2010"
     );
     equal(
-        _date([2007, 1, 28]).subtract({M:1}).format("MMMM Do YYYY"), 
-        "January 28th 2007", 
+        _date([2007, 1, 28]).subtract({M:1}).format("MMMM Do YYYY"),
+        "January 28th 2007",
         "[2007, 1, 28] - {M:1} = January 28th 2010"
     );
 });
@@ -216,7 +223,7 @@ test("underscore mixin", 6, function() {
 
 
 module("custom");
-    
+
 test("format", 9, function() {
     var dateTest = _date(new Date(2010, 1, 14, 15, 25, 50, 125)),
         _months = _date.months,
@@ -237,7 +244,7 @@ test("format", 9, function() {
         ],
         b = _date(new Date(2010, 1, 14, 15, 25, 50, 125)),
         i;
-    
+
     _date.months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
     _date.monthsShort = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
     _date.weekdays = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
@@ -245,11 +252,11 @@ test("format", 9, function() {
     _date.ordinal = function() {
         return 'o';
     }
-    
+
     for (i = 0; i < a.length; i++) {
         equal(b.format(a[i][0]), a[i][1], a[i][0] + ' ---> ' + a[i][1]);
     }
-    
+
     _date.months = _months;
     _date.monthsShort = _monthsShort;
     _date.weekdays = _weekdays;
@@ -261,7 +268,7 @@ test("format", 9, function() {
 test("from date parts", 11, function() {
     var backup = _date.relativeTime,
         start = _date([2007, 1, 28]);
-    
+
     _date.relativeTime = {
         future: "%s testing a",
         past: "%s testing b",
@@ -277,7 +284,7 @@ test("from date parts", 11, function() {
         y: "a year!",
         yy: "%d years!"
     };
-    
+
     equal(start.from(_date([2007, 1, 28]).add({s:30}), true), "seconds!", "seconds");
     equal(start.from(_date([2007, 1, 28]).add({s:60}), true), "a minute!", "minute");
     equal(start.from(_date([2007, 1, 28]).add({m:5}), true), "5 minutes!", "minutes");
@@ -289,13 +296,13 @@ test("from date parts", 11, function() {
     equal(start.from(_date([2007, 1, 28]).add({M:5}), true), "5 months!", "months");
     equal(start.from(_date([2007, 1, 28]).add({y:1}), true), "a year!", "year");
     equal(start.from(_date([2007, 1, 28]).add({y:5}), true), "5 years!", "years");
-    
+
     _date.relativeTime = backup;
 });
 
 test("from future past", 2, function() {
     var backup = _date.relativeTime;
-    
+
     _date.relativeTime = {
         future: "%s testing a",
         past: "%s testing b",
@@ -314,6 +321,6 @@ test("from future past", 2, function() {
 
     equal(_date(30000).from(0), "seconds testing a", 'future');
     equal(_date(0).from(30000), "seconds testing b", 'past');
-    
+
     _date.relativeTime = backup;
 });
