@@ -145,10 +145,20 @@
       this.date = new Date();
     }
     else if (input.date instanceof Date) {
-      this.date = input.date;
+      if (format === "") {
+        this.date = new Date(input.date.toString());
+      }
+      else {
+        this.date = input.date;
+      }
     }
     else if (input instanceof Date) {
-      this.date = input;
+      if (format === "") {
+        this.date = new Date(input.toString());
+      }
+      else {
+        this.date = input;
+      }
     }
     else if (format) {
       this.date = makeDateFromStringAndFormat(input, format);
@@ -384,6 +394,10 @@
       var offset = this.date.getTimezoneOffset()
         , gmt = new UnderscoreDate(this.date.toString());
       return gmt.add({m: offset});
+    },
+
+    toString: function() {
+      return this.date.toString();
     },
 
     from : function (time, withoutSuffix, asMilliseconds) {

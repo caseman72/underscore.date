@@ -49,6 +49,11 @@ test("string without format", 2, function() {
     ok(_date("Mon, 25 Dec 1995 13:30:00 GMT").date instanceof Date, "Mon, 25 Dec 1995 13:30:00 GMT");
 });
 
+//test("twitter created_at without format", 2, function() {
+//    equal(_date("Mon Apr 09 23:36:31 GMT+0000 2012").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 07:45:00 PDT" , "2012-04-10T15:15:00+00:00");
+//    equal(_date("Mon Apr 09 23:36:31 GMT-0700 2012").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 14:45:00 PDT" , "2012-04-10T15:15:00-07:00");
+//});
+
 test("isostring without format", 4, function() {
     equal(_date("2012-04-10T14:45:00+00:00").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 07:45:00 PDT" , "2012-04-10T15:15:00+00:00");
     equal(_date("2012-04-10T14:45:00-07:00").format("YYYY-MM-DD HH:mm:ss z"), "2012-04-10 14:45:00 PDT" , "2012-04-10T15:15:00-07:00");
