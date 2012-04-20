@@ -93,6 +93,9 @@ module("format");
 
 
 test("format", 15, function() {
+    var userAgent = window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent.toLowerCase() : ""
+      , msie = /(msie) ([\w.]+)/.test(userAgent) ? true : false;
+
     var a = [
             ['dddd, MMMM Do YYYY, h:mm:ss a',      'Sunday, February 14th 2010, 3:25:50 pm'],
             ['ddd, hA',                            'Sun, 3PM'],
@@ -107,7 +110,7 @@ test("format", 15, function() {
             ['m mm',                               '25 25'],
             ['s ss',                               '50 50'],
             ['a A',                                'pm PM'],
-            ['z zz',                               'PST Pacific Standard Time', 'PST PST'],
+            ['z zz',                               'PST ' +  (msie ? 'PST' : 'Pacific Standard Time')],
             ['t\\he DDDo \\d\\ay of t\\he ye\\ar', 'the 45th day of the year']
         ],
         b = _date(new Date(2010, 1, 14, 15, 25, 50, 125)),
@@ -118,15 +121,68 @@ test("format", 15, function() {
 });
 
 
-module("add and subtract");
+
+module("add, subtract and change");
 
 
-test("add and subtract", 3, function() {
+test("add, subtract and change", 12, function() {
     equal(
         _date([2010, 1, 14, 15, 25, 50, 125]).add({ms:200,s:10,m:10,h:2,d:3,M:2,y:3}).format("MMMM Do YYYY, h:mm:ss a"),
         "April 17th 2013, 5:36:00 pm",
         "[2010, 1, 14, 15, 25, 50, 125] + {ms:200,s:10,m:10,h:2,d:3,M:2,y:3} = April 17th 2013, 5:36:00 pm"
     );
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).subtract({ms:0,s:50,m:25,h:15,d:0,M:0,y:0}).format("MMMM Do YYYY, h:mm:ss a"),
+        "February 14th 2010, 12:00:00 am",
+        "[2010, 1, 14, 15, 25, 50, 0] - {ms:0,s:50,m:25,h:15,d:0,M:0,y:0} = February 14th 2010, 12:00:00 am"
+    );
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({d:1}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Mon, February 1st 2010, 12:00:00 am",
+        "[2010, 1, 14, 15, 25, 50, 0].change({d:1}) = Mon, February 1st 2010, 12:00:00 am"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({y:2009}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Thu, January 1st 2009, 12:00:00 am",
+        "[2010, 1, 14, 15, 25, 50, 0].change({Y:2009}) = Thu, January 1st 2009, 12:00:00 am"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({y:2009, d:4}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Sun, January 4th 2009, 12:00:00 am",
+        "[2010, 1, 14, 15, 25, 50, 0].change({Y:2009, d:4}) = Sun, January 4th 2009, 12:00:00 am"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({M:2,d:15,h:11,m:12,s:13}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Mon, March 15th 2010, 11:12:13 am",
+        "[2010, 1, 14, 15, 25, 50, 0].change({M:2,d:15,h:11,m:12,s:13}) = Mon, March 15th 2010, 11:12:13 am"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({y:2009,M:2,d:15,h:11,m:10,s:9}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Sun, March 15th 2009, 11:10:09 am",
+        "[2010, 1, 14, 15, 25, 50, 0].change({y:2009,M:2,d:15,h:11,m:10,s:9}) = Sun, March 15th 2009, 11:10:09 am"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({y:2009,M:0,d:15,h:21,m:21,s:31}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Thu, January 15th 2009, 9:21:31 pm",
+        "[2010, 1, 14, 15, 25, 50, 0].change({y:2009,M:0,d:15,h:21,m:21,s:31}) = Thu, January 15th 2009, 9:21:31 pm"
+    );
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).change({y:2009,d:15,h:14,m:41,s:51}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Thu, January 15th 2009, 2:41:51 pm",
+        "[2010, 1, 14, 15, 25, 50, 0].change({y:2009,d:15,h:14,m:41,s:51}) = Thu, January 15th 2009, 2:41:51 pm"
+    );
+
+    equal(
+        _date([2010, 1, 14, 15, 25, 50, 0]).gmt().change({y:2009,d:15,h:14,m:41,s:51}).format("ddd, MMMM Do YYYY, h:mm:ss a"),
+        "Thu, January 15th 2009, 2:41:51 pm",
+        "[2010, 1, 14, 15, 25, 50, 0].gmt().change({y:2009,d:15,h:14,m:41,s:51}) = Thu, January 15th 2009, 2:41:51 pm"
+    );
+
     equal(
         _date([2010, 0, 31]).add({M:1}).format("MMMM Do YYYY"),
         "February 28th 2010",

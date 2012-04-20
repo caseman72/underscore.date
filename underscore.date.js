@@ -24,25 +24,58 @@
   }
 
   // helper function for _.addTime and _.subtractTime
-  function dateAddRemove(date, input, adding) {
+  function dateAddRemove(date, input, adding, debug) {
     var ms = (input.ms || 0) +
-      (input.s  || 0) * 1e3 + // 1000
-      (input.m  || 0) * 6e4 + // 1000 * 60
-      (input.h  || 0) * 36e5 + // 1000 * 60 * 60
-      (input.d  || 0) * 864e5 + // 1000 * 60 * 60 * 24
-      (input.w  || 0) * 6048e5, // 1000 * 60 * 60 * 24 * 7
-      M = (input.M || 0) +
-      (input.y || 0) * 12,
-      currentDate;
+             (input.s  || 0) * 1e3 +   // 1000
+             (input.m  || 0) * 6e4 +   // 1000 * 60
+             (input.h  || 0) * 36e5 +  // 1000 * 60 * 60
+             (input.d  || 0) * 864e5 + // 1000 * 60 * 60 * 24
+             (input.w  || 0) * 6048e5  // 1000 * 60 * 60 * 24 * 7
+      , M  = (input.M  || 0) + (input.y || 0) * 12;
+
     if (ms) {
       date.setMilliseconds(date.getMilliseconds() + ms * adding);
     }
+
     if (M) {
-      currentDate = date.getDate();
+      var currentDate = date.getDate();
       date.setDate(1);
       date.setMonth(date.getMonth() + M * adding);
       date.setDate(Math.min(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(), currentDate));
     }
+    return date;
+  }
+
+  // helper function for _.changeTime
+  function dateReset(date, input) {
+    var key = _.first(_.filter(["y","M","d","h","m","s","ms"], function(key) {
+      return ((key in input) && input[key]);
+    }));
+
+    var ms = 0;
+    switch (key) {
+      case "y":
+        date.setFullYear(0);
+      case "M":
+        date.setMonth(0);
+      case "d":
+        input.d
+          ? ms += date.getDate() * 864e5 // if we are going to add days
+          : date.setDate(1);
+      case "h":
+        ms += date.getHours() * 36e5;
+      case "m":
+        ms += date.getMinutes() * 6e4;
+      case "s":
+        ms += date.getSeconds() * 1e3;
+      case "ms":
+        ms += date.getMilliseconds();
+    }
+
+    if (ms) {
+      date.setMilliseconds(date.getMilliseconds() - ms);
+    }
+
     return date;
   }
 
@@ -129,9 +162,10 @@
         }
       };
 
-    for (var i = 0, n=formatParts.length; i < n; i++) {
+    for (var i=0, n=formatParts.length; i<n; i++) {
       addTime(formatParts[i], inputParts[i]);
     }
+
     // handle am pm
     if (isPm && inArray[3] < 12) {
       inArray[3] += 12;
@@ -257,10 +291,6 @@
 
   UnderscoreDate.prototype = {
 
-    valueOf : function () {
-      return this.date.getTime();
-    },
-
     format : function (inputString) {
       // shortcuts to this and getting time functions
       // done to save bytes in minification
@@ -273,7 +303,8 @@
         currentMinutes = date.getMinutes(),
         currentSeconds = date.getSeconds(),
         currentString = date.toString(),
-        charactersToReplace = /(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|dddd?|do?|w[o|w]?|YYYY|YY|a|A|hh?|HH?|mm?|ss?|zz?)/g,
+        currentOffset = date.getTimezoneOffset()/60,
+        charactersToReplace = /(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|dddd?|do?|w[o|w]?|YYYY|YY|a|A|hh?|HH?|mm?|ss?|zz?|ZZ)/g,
         nonuppercaseLetters = /[^A-Z]/g;
       // check if the character is a format
       // return formatted string or non string.
@@ -363,6 +394,8 @@
         case "ss" :
           return leftZeroFill(currentSeconds, 2);
         // TIMEZONE
+        case "ZZ":
+          return (currentOffset > 0 ? "-" : "+") + leftZeroFill(currentOffset, 2) + ":00";
         case "z" :
           return replaceFunction("zz").replace(nonuppercaseLetters, "");
         case "zz" :
@@ -380,12 +413,20 @@
     },
 
     add : function (input) {
+      input = input || {};
       this.date = dateAddRemove(this.date, input, 1);
       return this;
     },
 
     subtract : function (input) {
+      input = input || {};
       this.date = dateAddRemove(this.date, input, -1);
+      return this;
+    },
+
+    change : function (input) {
+      input = input || {};
+      this.date = dateAddRemove(dateReset(this.date, input), input, 1);
       return this;
     },
 
@@ -396,8 +437,16 @@
       return gmt.add({m: offset});
     },
 
-    toString: function() {
+    toString : function() {
       return this.date.toString();
+    },
+
+    valueOf : function () {
+      return this.date.getTime();
+    },
+
+    getTime : function () {
+      return this.date.getTime();
     },
 
     from : function (time, withoutSuffix, asMilliseconds) {
