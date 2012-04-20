@@ -93,8 +93,7 @@ module("format");
 
 
 test("format", 15, function() {
-    var userAgent = window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent.toLowerCase() : ""
-      , msie = /(msie) ([\w.]+)/.test(userAgent) ? true : false;
+    var x = _date().format("z"), y = _date().format("zz"); // some machines these are the same ...
 
     var a = [
             ['dddd, MMMM Do YYYY, h:mm:ss a',      'Sunday, February 14th 2010, 3:25:50 pm'],
@@ -110,7 +109,7 @@ test("format", 15, function() {
             ['m mm',                               '25 25'],
             ['s ss',                               '50 50'],
             ['a A',                                'pm PM'],
-            ['z zz',                               'PST ' +  (msie ? 'PST' : 'Pacific Standard Time')],
+            ['z zz',                               'PST ' +  (x==y ? 'PST' : 'Pacific Standard Time')],
             ['t\\he DDDo \\d\\ay of t\\he ye\\ar', 'the 45th day of the year']
         ],
         b = _date(new Date(2010, 1, 14, 15, 25, 50, 125)),

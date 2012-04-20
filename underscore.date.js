@@ -17,7 +17,7 @@
   // see http://jsperf.com/left-zero-filling for performance comparison
   function leftZeroFill(number, targetLength) {
     var output = number + "";
-    while (output.length < targetLength) {
+    while(output.length < targetLength) {
       output = "0" + output;
     }
     return output;
@@ -33,11 +33,11 @@
              (input.w  || 0) * 6048e5  // 1000 * 60 * 60 * 24 * 7
       , M  = (input.M  || 0) + (input.y || 0) * 12;
 
-    if (ms) {
+    if(ms) {
       date.setMilliseconds(date.getMilliseconds() + ms * adding);
     }
 
-    if (M) {
+    if(M) {
       var currentDate = date.getDate();
       date.setDate(1);
       date.setMonth(date.getMonth() + M * adding);
@@ -48,11 +48,9 @@
 
   // helper function for _.changeTime
   function dateReset(date, input) {
-    var key = _.first(_.filter(["y","M","d","h","m","s","ms"], function(key) {
-      return ((key in input) && input[key]);
-    }));
+    var ms = 0
+      , key = _.first(_.filter(["y","M","d","h","m","s","ms"], function(key){ return (key in input) }));
 
-    var ms = 0;
     switch (key) {
       case "y":
         date.setFullYear(0);
@@ -60,8 +58,8 @@
         date.setMonth(0);
       case "d":
         input.d
-          ? ms += date.getDate() * 864e5 // if we are going to add days
-          : date.setDate(1);
+          ? ms += date.getDate() * 864e5  // 0; if we add days start with zero
+          : date.setDate(1);              // 1;
       case "h":
         ms += date.getHours() * 36e5;
       case "m":
@@ -72,7 +70,7 @@
         ms += date.getMilliseconds();
     }
 
-    if (ms) {
+    if(ms) {
       date.setMilliseconds(date.getMilliseconds() - ms);
     }
 
@@ -99,75 +97,65 @@
 
   // date from string and format string
   function makeDateFromStringAndFormat(string, format) {
-    var inArray = [0, 0, 0, 0, 0, 0, 0],
-      charactersToPutInArray = /[0-9a-zA-Z]+/g,
-      inputParts = string.match(charactersToPutInArray),
-      formatParts = format.match(charactersToPutInArray),
-      isPm = false,
-      addTime = function addTime(format, input) {
+    var inArray = [0, 0, 0, 0, 0, 0, 0]
+      , charactersToPutInArray = /[0-9a-zA-Z]+/g
+      , inputParts = string.match(charactersToPutInArray)
+      , formatParts = format.match(charactersToPutInArray)
+      , isPm = false
+      , addTime = function addTime(format, input) {
         // function to convert string input to date
         switch (format) {
-        // MONTH
-        case "M" :
-          // fall through to MM
-        case "MM" :
-          inArray[1] = ~~input - 1;
-          break;
-        // DAY OF MONTH
-        case "D" :
-          // fall through to DDDD
-        case "DD" :
-          // fall through to DDDD
-        case "DDD" :
-          // fall through to DDDD
-        case "DDDD" :
-          inArray[2] = ~~input;
-          break;
-        // YEAR
-        case "YY" :
-          input = ~~input;
-          inArray[0] = input + (input > 70 ? 1900 : 2000);
-          break;
-        case "YYYY" :
-          inArray[0] = ~~input;
-          break;
-        // AM / PM
-        case "a" :
-          // fall through to A
-        case "A" :
-          isPm = (input.toLowerCase() === "pm");
-          break;
-        // 24 HOUR
-        case "H" :
-          // fall through to hh
-        case "HH" :
-          // fall through to hh
-        case "h" :
-          // fall through to hh
-        case "hh" :
-          inArray[3] = ~~input;
-          break;
-        // MINUTE
-        case "m" :
-          // fall through to mm
-        case "mm" :
-          inArray[4] = ~~input;
-          break;
-        // SECOND
-        case "s" :
-          // fall through to ss
-        case "ss" :
-          inArray[5] = ~~input;
-          break;
+          // Month
+          case "M" :
+          case "MM" :
+            inArray[1] = ~~input - 1;
+            break;
+          // Day of Month
+          case "D" :
+          case "DD" :
+          case "DDD" :
+          case "DDDD" :
+            inArray[2] = ~~input;
+            break;
+          // Year
+          case "YY" :
+            input = ~~input;
+            inArray[0] = input + (input > 70 ? 1900 : 2000);
+            break;
+          case "YYYY" :
+            inArray[0] = ~~input;
+            break;
+          // AM / PM
+          case "a" :
+          case "A" :
+            isPm = (input.toLowerCase() === "pm");
+            break;
+          // 24 Hour
+          case "H" :
+          case "HH" :
+          case "h" :
+          case "hh" :
+            inArray[3] = ~~input;
+            break;
+          // Minute
+          case "m" :
+          case "mm" :
+            inArray[4] = ~~input;
+            break;
+          // Second
+          case "s" :
+          case "ss" :
+            inArray[5] = ~~input;
+            break;
         }
       };
 
-    for (var i=0, n=formatParts.length; i<n; i++) {
+    for(var i=0, n=formatParts.length; i<n; i++) {
       addTime(formatParts[i], inputParts[i]);
     }
 
     // handle am pm
-    if (isPm && inArray[3] < 12) {
+    if(isPm && inArray[3] < 12) {
       inArray[3] += 12;
     }
     return dateFromArray(inArray);
@@ -175,44 +163,44 @@
 
   // UnderscoreDate prototype object
   function UnderscoreDate(input, format) {
-    if (input === undefined) {
+    if(input === undefined) {
       this.date = new Date();
     }
-    else if (input.date instanceof Date) {
-      if (format === "") {
+    else if(input.date instanceof Date) {
+      if(format === "") {
         this.date = new Date(input.date.toString());
       }
       else {
         this.date = input.date;
       }
     }
-    else if (input instanceof Date) {
-      if (format === "") {
+    else if(input instanceof Date) {
+      if(format === "") {
         this.date = new Date(input.toString());
       }
       else {
         this.date = input;
       }
     }
-    else if (format) {
+    else if(format) {
       this.date = makeDateFromStringAndFormat(input, format);
     }
-    else if (isArray(input)) {
+    else if(isArray(input)) {
       this.date = dateFromArray(input);
     }
-    else if (noIsoParse && isString(input)) {
+    else if(noIsoParse && isString(input)) {
       var parts = iso8601Format.exec(input)
         , offset = 0;
 
-      if (parts) {
+      if(parts) {
         this.date = new Date(parts[1], parts[2]-1, parts[3], parts[4], parts[5], parts[6]);
-        if (parts[7] !== "Z") {
+        if(parts[7] !== "Z") {
           offset = (parts[8] * 60) + (parts[9] * 1);
           offset *= parts[7] == "-" ? 1 : -1;
           offset -= this.date.getTimezoneOffset();
           offset *= 60E3; // convert to milliseconds
         }
-        if (offset !== 0) {
+        if(offset !== 0) {
           this.date.setTime(this.date.getTime() + offset);
         }
       }
@@ -250,10 +238,11 @@
   };
   _date.ordinal = function (number) {
     var b = number % 10;
-    return (~~ (number % 100 / 10) === 1) ? "th" :
-      (b === 1) ? "st" :
-      (b === 2) ? "nd" :
-      (b === 3) ? "rd" : "th";
+    return (~~ (number % 100 / 10) === 1)
+            ? "th" : (b === 1)
+            ? "st" : (b === 2)
+            ? "nd" : (b === 3)
+            ? "rd" : "th";
   };
 
   // convert any input to milliseconds
@@ -271,11 +260,12 @@
   }
 
   function relativeTime(milliseconds) {
-    var seconds = Math.abs(milliseconds) / 1000,
-      minutes = seconds / 60,
-      hours = minutes / 60,
-      days = hours / 24,
-      years = days / 365;
+    var seconds = Math.abs(milliseconds) / 1000
+      , minutes = seconds / 60
+      , hours = minutes / 60
+      , days = hours / 24
+      , years = days / 365;
+
     return seconds < 45 && substituteTimeAgo("s", round(seconds)) ||
       round(minutes) === 1 && substituteTimeAgo("m") ||
       minutes < 45 && substituteTimeAgo("mm", round(minutes)) ||
@@ -290,22 +280,21 @@
   }
 
   UnderscoreDate.prototype = {
-
     format : function (inputString) {
       // shortcuts to this and getting time functions
       // done to save bytes in minification
-      var date = this.date,
-        currentMonth = date.getMonth(),
-        currentDate = date.getDate(),
-        currentYear = date.getFullYear(),
-        currentDay = date.getDay(),
-        currentHours = date.getHours(),
-        currentMinutes = date.getMinutes(),
-        currentSeconds = date.getSeconds(),
-        currentString = date.toString(),
-        currentOffset = date.getTimezoneOffset()/60,
-        charactersToReplace = /(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|dddd?|do?|w[o|w]?|YYYY|YY|a|A|hh?|HH?|mm?|ss?|zz?|ZZ)/g,
-        nonuppercaseLetters = /[^A-Z]/g;
+      var date = this.date
+        , currentMonth = date.getMonth()
+        , currentDate = date.getDate()
+        , currentYear = date.getFullYear()
+        , currentDay = date.getDay()
+        , currentHours = date.getHours()
+        , currentMinutes = date.getMinutes()
+        , currentSeconds = date.getSeconds()
+        , currentString = date.toString()
+        , currentOffset = date.getTimezoneOffset()/60
+        , charactersToReplace = /(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|dddd?|do?|w[o|w]?|YYYY|YY|a|A|hh?|HH?|mm?|ss?|zz?|ZZ)/g
+        , nonuppercaseLetters = /[^A-Z]/g;
       // check if the character is a format
       // return formatted string or non string.
       //
@@ -316,7 +305,7 @@
         // create a couple variables to be used later inside one of the cases.
         var a, b;
         switch (input) {
-          // MONTH
+        // Month
         case "M" :
           return currentMonth + 1;
         case "Mo" :
@@ -327,14 +316,14 @@
           return _date.monthsShort[currentMonth];
         case "MMMM" :
           return _date.months[currentMonth];
-        // DAY OF MONTH
+        // Day of Month
         case "D" :
           return currentDate;
         case "Do" :
           return currentDate + _date.ordinal(currentDate);
         case "DD" :
           return leftZeroFill(currentDate, 2);
-        // DAY OF YEAR
+        // Day of Year
         case "DDD" :
           a = new Date(currentYear, currentMonth, currentDate);
           b = new Date(currentYear, 0, 1);
@@ -344,7 +333,7 @@
           return a + _date.ordinal(a);
         case "DDDD" :
           return leftZeroFill(replaceFunction("DDD"), 3);
-        // WEEKDAY
+        // Weekday
         case "d" :
           return currentDay;
         case "do" :
@@ -353,7 +342,7 @@
           return _date.weekdaysShort[currentDay];
         case "dddd" :
           return _date.weekdays[currentDay];
-        // WEEK OF YEAR
+        // Week of Year
         case "w" :
           a = new Date(currentYear, currentMonth, currentDate - currentDay + 5);
           b = new Date(a.getFullYear(), 0, 4);
@@ -363,7 +352,7 @@
           return a + _date.ordinal(a);
         case "ww" :
           return leftZeroFill(replaceFunction("w"), 2);
-        // YEAR
+        // Year
         case "YY" :
           return (currentYear + "").slice(-2);
         case "YYYY" :
@@ -373,38 +362,38 @@
           return currentHours > 11 ? "pm" : "am";
         case "A" :
           return currentHours > 11 ? "PM" : "AM";
-        // 24 HOUR
+        // 24 Hour
         case "H" :
           return currentHours;
         case "HH" :
           return leftZeroFill(currentHours, 2);
-        // 12 HOUR
+        // 12 Hour
         case "h" :
           return currentHours % 12 || 12;
         case "hh" :
           return leftZeroFill(currentHours % 12 || 12, 2);
-        // MINUTE
+        // Minute
         case "m" :
           return currentMinutes;
         case "mm" :
           return leftZeroFill(currentMinutes, 2);
-        // SECOND
+        // Second
         case "s" :
           return currentSeconds;
         case "ss" :
           return leftZeroFill(currentSeconds, 2);
-        // TIMEZONE
+        // Timezone
         case "ZZ":
           return (currentOffset > 0 ? "-" : "+") + leftZeroFill(currentOffset, 2) + ":00";
         case "z" :
           return replaceFunction("zz").replace(nonuppercaseLetters, "");
         case "zz" :
           a = currentString.indexOf("(");
-          if (a > -1) {
+          if(a > -1) {
             return currentString.slice(a + 1, currentString.indexOf(")"));
           }
           return currentString.slice(currentString.indexOf(":")).replace(nonuppercaseLetters, "");
-        // DEFAULT
+        // Default
         default :
           return input.replace("\\", "");
         }
@@ -450,8 +439,8 @@
     },
 
     from : function (time, withoutSuffix, asMilliseconds) {
-      var difference = msApart(this.date, time),
-        string = difference < 0 ? _date.relativeTime.past : _date.relativeTime.future;
+      var difference = msApart(this.date, time)
+        , string = difference < 0 ? _date.relativeTime.past : _date.relativeTime.future;
       return asMilliseconds ? difference :
         withoutSuffix ? relativeTime(difference) :
         string.replace(/%s/i, relativeTime(difference));
@@ -468,13 +457,13 @@
   };
 
   // CommonJS module is defined
-  if (typeof window === "undefined" && typeof module !== "undefined") {
+  if(typeof window === "undefined" && typeof module !== "undefined") {
     // Export module
     module.exports = _date;
   }
   // Integrate with Underscore.js
   else {
-    if (this._ !== undefined && this._.mixin !== undefined) {
+    if(this._ !== undefined && this._.mixin !== undefined) {
       this._.mixin({date : _date});
     }
     this._date = _date;
