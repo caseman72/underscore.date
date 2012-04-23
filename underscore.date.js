@@ -189,19 +189,14 @@
       this.date = dateFromArray(input);
     }
     else if(noIsoParse && isString(input)) {
-      var parts = iso8601Format.exec(input)
-        , offset = 0;
-
+      var parts = iso8601Format.exec(input);
       if(parts) {
         this.date = new Date(parts[1], parts[2]-1, parts[3], parts[4], parts[5], parts[6]);
         if(parts[7] !== "Z") {
-          offset = (parts[8] * 60) + (parts[9] * 1);
-          offset *= parts[7] == "-" ? 1 : -1;
-          offset -= this.date.getTimezoneOffset();
-          offset *= 60E3; // convert to milliseconds
-        }
-        if(offset !== 0) {
-          this.date.setTime(this.date.getTime() + offset);
+          var offset = ((parts[8] * 60) + (parts[9] * 1)) * (parts[7] == "-" ? 1 : -1) - this.date.getTimezoneOffset();
+          if(offset) {
+            this.date.setTime(this.date.getTime() + offset * 60e3);
+          }
         }
       }
       else {
@@ -420,10 +415,12 @@
     },
 
     gmt : function() {
-      // to not change the current object create a new one
-      var offset = this.date.getTimezoneOffset()
-        , gmt = new UnderscoreDate(this.date.toString());
-      return gmt.add({m: offset});
+      var offset = this.date.getTimezoneOffset();
+      return this.clone().add({m: offset});
+    },
+
+    clone: function() {
+      return new UnderscoreDate(this.date, "");
     },
 
     toString : function() {
