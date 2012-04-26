@@ -24,7 +24,7 @@
   }
 
   // helper function for _.addTime and _.subtractTime
-  function dateAddRemove(date, input, adding, debug) {
+  function dateAddRemove(date, input, adding) {
     var ms = (input.ms || 0) +
              (input.s  || 0) * 1e3 +   // 1000
              (input.m  || 0) * 6e4 +   // 1000 * 60
